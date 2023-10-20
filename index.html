@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data dari Blynk</title>
+</head>
+<body>
+    <h1>Data dari Blynk</h1>
+    <p>Suhu: <span id="temperature-data"></span> Celcius</p>
+    <p>Kelembapan Udara: <span id="humidity-data"></span> %</p>
+    <p>Sensor Gas: <span id="gas-sensor-data"></span></p>
+    <p>Status Koneksi: <span id="connection-status"></span></p>
+
+    <script>
+        var dataUrl = "https://sgp1.blynk.cloud/external/api/get?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z&V2&V3&V5";
+        var connectionUrl = "https://sgp1.blynk.cloud/external/api/isHardwareConnected?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z";
+
+        function fetchDataFromBlynk() {
+            fetch(dataUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Gagal mengambil data dari API Blynk');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var temperature = data.V2;
+                    var humidity = data.V3;
+                    var gasSensor = data.V5;
+
+                    document.getElementById("temperature-data").textContent = temperature;
+                    document.getElementById("humidity-data").textContent = humidity;
+                    document.getElementById("gas-sensor-data").textContent = gasSensor;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function checkConnectionStatus() {
+            fetch(connectionUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Gagal memeriksa status koneksi');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    var isConnected = data === "true";
+                    var connectionStatusElement = document.getElementById("connection-status");
+                    connectionStatusElement.textContent = isConnected ? "Terhubung" : "Tidak Terhubung";
+
+                    if (isConnected) {
+                        connectionStatusElement.style.color = "green"; // Perangkat terhubung, tampilkan data dan ubah warna menjadi hijau
+                        fetchDataFromBlynk(); // Ambil data jika terhubung
+                    } else {
+                        connectionStatusElement.style.color = "red"; // Perangkat tidak terhubung, tampilkan status merah
+                        // Atau Anda dapat menyembunyikan data di sini
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        checkConnectionStatus();
+
+        setInterval(checkConnectionStatus, 1000); // Periksa status koneksi setiap 10 detik
+    </script>
+</body>
+</html>
