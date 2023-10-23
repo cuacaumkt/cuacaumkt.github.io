@@ -1,76 +1,169 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Data dari Blynk</title>
-</head>
-<body>
-    <h1>Data dari Blynk</h1>
-    <p>Suhu: <span id="temperature-data"></span> &#8451;</p>
-    <p>Kelembapan Udara: <span id="humidity-data"></span> %</p>
-    <p>Sensor Gas: <span id="gas-sensor-data"></span></p>
-    <p>Status Koneksi: <span id="connection-status"></span></p>
-    <p>Status Hujan: <span id="sensor-hujan"></span></p>
+    <head>
+        <title>SensorySync</title>
 
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+            crossorigin="anonymous"
+        />
 
-    <script>
-        var dataUrl = "https://sgp1.blynk.cloud/external/api/get?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z&V2&V3&V5&V6";
-        var connectionUrl = "https://sgp1.blynk.cloud/external/api/isHardwareConnected?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z";
+        <style>
+          * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="status d-none">
+            <span id="connection-status"></span>
+        </div>
 
-        function fetchDataFromBlynk() {
-            fetch(dataUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal mengambil data dari API Blynk');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    var temperature = data.V2;
-                    var humidity = data.V3;
-                    var gasSensor = data.V5;
-                    var sensorHujan = data.V6;
+        <div class="position-absolute z-n1">
+          <img src="img/bg.jpg" alt="" width="100%" style="filter: blur(2px); width: 100%;">
+        </div>
+        <div class="position-relative">
+            <div class="header d-flex justify-content-center mt-3">
+                <h1 class="fw-bold">SensorySync</h1>
+            </div>
 
+            <div class="title text-center">
+                <h2>Universitas Muhammadiyah Kalimantan Timur</h2>
+            </div>
 
-                    document.getElementById("temperature-data").textContent = temperature;
-                    document.getElementById("humidity-data").textContent = humidity;
-                    document.getElementById("gas-sensor-data").textContent = gasSensor;
-                    document.getElementById("sensor-hujan").textContent = sensorHujan === 0 ? "Hujan" : "Tidak Hujan";
+            <div class="rain-status text-center">
+                <h3>Cuaca Kampus saat ini</h3>
+            </div>
 
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+            <div class="text-center mb-5 mt-3">
+                <img id="weather-icon"
+                    class="d-inline-block"
+                    src="img/rainy.png"
+                    alt=""
+                    width="250px"
+                />
+                <span class="d-block fs-1 fw-bolder" id="sensor-hujan"
+                    >Cerah</span
+                >
+            </div>
 
-        function checkConnectionStatus() {
-            fetch(connectionUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Gagal memeriksa status koneksi');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    var isConnected = data === "true";
-                    var connectionStatusElement = document.getElementById("connection-status");
-                    connectionStatusElement.textContent = isConnected ? "Terhubung" : "Tidak Terhubung";
+            <div class="row align-items-center mt-5">
+                <div class="col text-center fw-bold">
+                    <img
+                        class="d-inline-block"
+                        src="img/termometer.png"
+                        alt=""
+                        width="60px"
+                    />
+                    <span class="d-block text-white" style="font-size: 40px"
+                        ><span id="temperature-data"></span> &#8451;</span
+                    >
+                </div>
+                <div class="col text-center fw-bold">
+                    <img
+                        class="d-inline-block"
+                        src="img/humadity.png"
+                        alt=""
+                        width="120px"
+                    />
+                    <span class="d-block text-white" style="font-size: 40px"
+                        ><span id="humidity-data"></span> %</span
+                    >
+                </div>
+                <div class="col text-center fw-bold">
+                    <img class="d-inline-block" src="img/co2.png" alt="" width="120px" />
+                    <span class="d-block text-white" style="font-size: 40px"
+                        ><span id="gas-sensor-data"></span
+                    ></span>
+                </div>
+            </div>
+        </div>
 
-                    if (isConnected) {
-                        connectionStatusElement.style.color = "green"; // Perangkat terhubung, tampilkan data dan ubah warna menjadi hijau
-                        fetchDataFromBlynk(); // Ambil data jika terhubung
-                    } else {
-                        connectionStatusElement.style.color = "red"; // Perangkat tidak terhubung, tampilkan status merah
-                        // Atau Anda dapat menyembunyikan data di sini
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+        <script>
+            var dataUrl =
+                "https://sgp1.blynk.cloud/external/api/get?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z&V2&V3&V5&V6";
+            var connectionUrl =
+                "https://sgp1.blynk.cloud/external/api/isHardwareConnected?token=h-wpjGdITWeEMCtfmHYgknQ1icMG3I4Z";
 
-        checkConnectionStatus();
+            function fetchDataFromBlynk() {
+                fetch(dataUrl)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(
+                                "Gagal mengambil data dari API Blynk"
+                            );
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        let temperature = data.V2;
+                        let humidity = data.V3;
+                        let gasSensor = data.V5;
+                        let sensorHujan = data.V6;
 
-        setInterval(checkConnectionStatus, 1000); // Periksa status koneksi setiap 0,5 detik
-    </script>
-</body>
+                        let gasSensorText;
+                        if (gasSensor >= 0 && gasSensor <= 240) {
+                            gasSensorText = "Udara Normal";
+                        } else if (gasSensor > 240 && gasSensor <= 300) {
+                            gasSensorText = "Udara Kurang Sehat";
+                        } else if (gasSensor > 300) {
+                            gasSensorText = "Udara Tidak Sehat";
+                        }
+
+                        document.getElementById(
+                            "temperature-data"
+                        ).textContent = temperature;
+                        document.getElementById("humidity-data").textContent = humidity;
+                        document.getElementById("gas-sensor-data").textContent = gasSensorText;
+                        document.getElementById("sensor-hujan").textContent = sensorHujan === 0 ? "Hujan" : "Tidak Hujan";
+                        document.getElementById("weather-icon").src = sensorHujan === 0 ? "img/rainy.png" : "img/cloudy.png";
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+
+            function checkConnectionStatus() {
+                fetch(connectionUrl)
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Gagal memeriksa status koneksi");
+                        }
+                        return response.text();
+                    })
+                    .then((data) => {
+                        var isConnected = data === "true";
+                        var connectionStatusElement =
+                            document.getElementById("connection-status");
+                        connectionStatusElement.textContent = isConnected
+                            ? "Terhubung"
+                            : "Tidak Terhubung";
+
+                        if (isConnected) {
+                            connectionStatusElement.style.color = "green"; // Perangkat terhubung, tampilkan data dan ubah warna menjadi hijau
+                            fetchDataFromBlynk(); // Ambil data jika terhubung
+                        } else {
+                            connectionStatusElement.style.color = "red"; // Perangkat tidak terhubung, tampilkan status merah
+                            // Atau Anda dapat menyembunyikan data di sini
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+
+            checkConnectionStatus();
+
+            setInterval(checkConnectionStatus, 1000); // Periksa status koneksi setiap 10 detik
+        </script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"
+        ></script>
+    </body>
 </html>
